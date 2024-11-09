@@ -1,0 +1,22 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MechanicBlazor", "MechanicBlazor\MechanicBlazor.csproj", "{1EE43FFE-920D-4518-B6FB-AE338D9D7EF5}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MechanicBE", "MechanicBE\MechanicBE.csproj", "{4BA677A1-2B68-4C82-B215-A5846ADAEDCA}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{1EE43FFE-920D-4518-B6FB-AE338D9D7EF5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1EE43FFE-920D-4518-B6FB-AE338D9D7EF5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1EE43FFE-920D-4518-B6FB-AE338D9D7EF5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1EE43FFE-920D-4518-B6FB-AE338D9D7EF5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4BA677A1-2B68-4C82-B215-A5846ADAEDCA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4BA677A1-2B68-4C82-B215-A5846ADAEDCA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4BA677A1-2B68-4C82-B215-A5846ADAEDCA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4BA677A1-2B68-4C82-B215-A5846ADAEDCA}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
