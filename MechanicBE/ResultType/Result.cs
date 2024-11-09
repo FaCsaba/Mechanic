@@ -45,12 +45,13 @@ public abstract record Result<TOk> : IResult
     public static implicit operator Result<TOk>(Error error) => Err(error);
     public static implicit operator Result<TOk>(TOk value) => Ok(value);
 
-    public static implicit operator Result<TOk>(Result<Result<TOk>> result)
-    {
-        if (result is OkResult<Result<TOk>> innerResult) return innerResult.Value;
-        if (result is ErrResult<TOk> err) return err;
-        throw new UnreachableException();
-    }
+    public static implicit operator Result<TOk>(Result<Result<TOk>> result) =>
+        result switch
+        {
+            OkResult<Result<TOk>> innerResult => innerResult.Value,
+            ErrResult<TOk> err => err,
+            _ => throw new UnreachableException()
+        };
 
     public static implicit operator ActionResult<TOk>(Result<TOk> result) =>
         result.Match<ObjectResult>(x => new OkObjectResult(x),
