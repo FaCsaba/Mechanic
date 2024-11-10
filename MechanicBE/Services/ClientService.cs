@@ -22,7 +22,7 @@ public class ClientService(
         var validationResult = await updateClientValidator.EnsureValidAsync(updateClient);
 
         Result<Client> clientResult =
-            await validationResult.MapAsync(async c => await EnsureClientExists(c.Id));
+            await validationResult.MapAsync(c => EnsureClientExists(c.Id));
 
         return await clientResult.UseAsync(async client =>
         {
@@ -56,7 +56,7 @@ public class ClientService(
         });
     }
 
-    private async Task<Result<Client>> EnsureClientExists(Guid id)
+    public async Task<Result<Client>> EnsureClientExists(Guid id)
     {
         var client = await GetClientAsync(id);
         if (client is null) return new NotFoundError("Client with id could not be found");

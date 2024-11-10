@@ -7,11 +7,23 @@ using IResult = MechanicBE.ResultType.IResult;
 
 namespace MechanicBE.Errors;
 
-public record Error(string Message);
+public record Error(string Message)
+{
+    public static implicit operator ObjectResult(Error? err) => err switch
+    {
+        null => new OkObjectResult(null),
+        NotFoundError error => new NotFoundObjectResult(error),
+        _ => new BadRequestObjectResult(err)
+    };
+
+    public static implicit operator ActionResult(Error error) => (ObjectResult)error;
+}
 
 public record NotFoundError(string Message) : Error(Message);
 
 public record ValidationError(string Message, List<ValidationFailure> ValidationFailures) : Error(Message);
+
+public record StatusChangeError(string Message) : Error(Message);
 
 public static class ErrorExt
 {
@@ -21,10 +33,4 @@ public static class ErrorExt
         if (validationResult.IsValid) return item;
         return new ValidationError("Validation failed", validationResult.Errors);
     }
-
-    public static ObjectResult ToObjectResult(this Error err) => err switch
-    {
-        NotFoundError error => new NotFoundObjectResult(error),
-        _ => new BadRequestObjectResult(err)
-    };
 }

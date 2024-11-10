@@ -15,22 +15,21 @@ public class ClientController(IClientService clientService) : ControllerBase
     public async Task<ActionResult<List<Client>>> GetClients() =>
         Ok(await clientService.GetAllClientsAsync());
 
+    [HttpGet]
+    [Route("{id:guid}")]
+    public async Task<ActionResult<Client>> GetClient([FromRoute] Guid id) =>
+        await clientService.EnsureClientExists(id);
+
 
     [HttpPost]
     public async Task<ActionResult<Client>> CreateClient([FromBody] CreateClient createClient) =>
         await clientService.CreateClientAsync(createClient);
 
     [HttpPut]
-    public async Task<IActionResult> UpdateClient([FromBody] UpdateClient updateClient)
-    {
-        var res = await clientService.UpdateClientAsync(updateClient);
-        return res is null ? Ok() : res.ToObjectResult();
-    }
+    public async Task<ActionResult?> UpdateClient([FromBody] UpdateClient updateClient) =>
+        await clientService.UpdateClientAsync(updateClient);
 
     [HttpDelete]
-    public async Task<IActionResult> DeleteClient([FromQuery] Guid id)
-    {
-        var res = await clientService.DeleteClientAsync(id);
-        return res is null ? Ok() : res.ToObjectResult();
-    }
+    [Route("{id:guid}")]
+    public async Task<ActionResult?> DeleteClient([FromRoute] Guid id) => await clientService.DeleteClientAsync(id);
 }

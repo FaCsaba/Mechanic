@@ -18,4 +18,6 @@ public interface IClientService
     Task<Result<Client>> CreateClientAsync(CreateClient createClient);
 
     Task<Error?> DeleteClientAsync(Guid id);
+
+    Task<Result<Client>> EnsureClientExists(Guid id);
 }

@@ -20,8 +20,11 @@ builder.Services.AddSingleton<IWorkHourEstimator, WorkHourEstimationService>();
 
 builder.Services.AddScoped<IValidator<CreateClient>, CreateClientValidator>();
 builder.Services.AddScoped<IValidator<UpdateClient>, UpdateClientValidator>();
+builder.Services.AddScoped<IValidator<CreateCommission>, CreateCommissionValidator>();
+builder.Services.AddScoped<IValidator<UpdateCommission>, UpdateCommissionValidator>();
 
 builder.Services.AddScoped<IClientService, ClientService>();
+builder.Services.AddScoped<ICommissionService, CommissionService>();
 
 builder.Services.AddDbContext<MechanicContext>(options =>
     options.UseSqlite(builder.Configuration.GetConnectionString("SQLite"))
