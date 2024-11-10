@@ -1,0 +1,98 @@
+@page "/commissions"
+@using MechanicShared.Models
+@using MechanicShared.Models.Dto
+@inject HttpClient httpClient
+<h3>Commissions</h3>
+
+<QuickGrid Items="@_commissions">
+    <PropertyColumn Title="Client's Name" Property="@(c => c.Client.Name)" Sortable="true"/>
+    <PropertyColumn Title="License Plate Number" Property="@(c => c.LicensePlateNumber)" Sortable="true"/>
+    <PropertyColumn Title="Manufactured at" Property="@(c => c.VehicleManufacturingDate)" Sortable="true"/>
+    <PropertyColumn Title="Fault" Property="@(c => c.FaultCategory)" Sortable="true"/>
+    <PropertyColumn Title="Severity" Property="@(c => c.Severity)" Sortable="true"/>
+    <PropertyColumn Title="Status" Property="@(c => c.Status)" Sortable="true"/>
+    <PropertyColumn Title="Estimate (h.)" Property="@(c => c.WorkHourEstimate)" Sortable="true"/>
+    <PropertyColumn Title="Description" Property="@(c => c.Description)" Sortable="true"/>
+
+    <TemplateColumn Title="Actions">
+
+        <button @onclick="@(() => DeleteCommission(context.Id))">Delete</button>
+        @* <button @onclick="@(() => Fire(context))">Fire</button> *@
+    </TemplateColumn>
+</QuickGrid>
+
+<EditForm Model=@_createCommission OnSubmit="@CreateCommission">
+    <div class="form-group">
+        <label>Client</label>
+        <InputSelect @bind-Value="_createCommission.ClientId">
+            <option></option>
+            @foreach (var client in _clients)
+            {
+                <option value="@client.Id">@client.Name</option>
+            }
+        </InputSelect>
+    </div>
+    <div class="form-group">
+        <label>License Plate Number</label>
+        <InputText @bind-Value="_createCommission.LicensePlateNumber"/>
+    </div>
+    <div class="form-group">
+        <label>Manufacturing at</label>
+        <InputDate @bind-Value="_createCommission.VehicleManufacturingDate" />
+    </div>
+    <div class="form-group">
+        <label>Fault</label>
+        <InputSelect @bind-Value="_createCommission.FaultCategory">
+            <option value="@FaultCategory.Bodywork">BodyWork</option>
+            <option value="@FaultCategory.Motor">Motor</option>
+            <option value="@FaultCategory.RunningGear">RunningGear</option>
+            <option value="@FaultCategory.Brake">Brake</option>
+        </InputSelect>
+    </div>
+    <div class="form-group">
+        <label>Severity</label>
+        <InputNumber @bind-Value="_createCommission.Severity" min="0" max="10" />
+    </div>
+    <div class="form-group">
+        <label>Description</label>
+        <InputText @bind-Value="_createCommission.Description" />
+    </div>
+    <input type="submit" value="Submit" class="btn btn-primary"/>
+</EditForm>
+
+@code {
+    IQueryable<CommissionDto> _commissions = new List<CommissionDto>().AsQueryable();
+    IQueryable<Client> _clients = new List<Client>().AsQueryable();
+    CreateCommission _createCommission = new();
+
+    private async Task GetCommissions()
+    {
+        var commissionDtos = await httpClient.GetFromJsonAsync<List<CommissionDto>>("commission")
+                             ?? throw new Exception("Failed to get commissions");
+        _commissions = commissionDtos.AsQueryable();
+    }
+
+    private async Task GetClients()
+    {
+        var clients = await httpClient.GetFromJsonAsync<List<Client>>("client") ?? throw new Exception("Failed to get clients");
+        _clients = clients.AsQueryable();
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        await Task.WhenAll(GetCommissions(), GetClients());
+    }
+
+    private async Task DeleteCommission(Guid id)
+    {
+        await httpClient.DeleteAsync($"commission?id={id}");
+        await GetCommissions();
+    }
+
+    private async Task CreateCommission()
+    {
+        await httpClient.PostAsJsonAsync("commission", _createCommission);
+        await GetCommissions();
+    }
+
+}

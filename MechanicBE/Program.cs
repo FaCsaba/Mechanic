@@ -1,7 +1,6 @@
 using FluentValidation;
-using FluentValidation.AspNetCore;
 using MechanicBE.Contexts;
-using MechanicBE.Models.Dto;
+using MechanicShared.Models.Dto;
 using MechanicBE.Services;
 using MechanicBE.Validators;
 using Microsoft.EntityFrameworkCore;
@@ -30,6 +29,17 @@ builder.Services.AddDbContext<MechanicContext>(options =>
     options.UseSqlite(builder.Configuration.GetConnectionString("SQLite"))
 );
 
+const string policyName = "CorsPolicy";
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy(name: policyName, b =>
+    {
+        b.AllowAnyOrigin()
+            .AllowAnyHeader()
+            .AllowAnyMethod();
+    });
+});
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -44,5 +54,7 @@ app.UseHttpsRedirection();
 app.UseAuthorization();
 
 app.MapControllers();
+
+app.UseCors(policyName);
 
 app.Run();

@@ -1,4 +1,4 @@
-using MechanicBE.Models;
+using MechanicShared.Models;
 
 namespace MechanicBE.Services;
 

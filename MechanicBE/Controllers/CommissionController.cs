@@ -1,7 +1,7 @@
 using MechanicBE.Errors;
-using MechanicBE.Models;
-using MechanicBE.Models.Dto;
 using MechanicBE.Services;
+using MechanicShared.Models;
+using MechanicShared.Models.Dto;
 using Microsoft.AspNetCore.Mvc;
 
 namespace MechanicBE.Controllers;
@@ -26,11 +26,11 @@ public class CommissionController(ICommissionService commissionService, IWorkHou
 
     [HttpPut]
     public async Task<ActionResult> UpdateCommission([FromBody] UpdateCommission updateCommission) =>
-        await commissionService.UpdateCommissionAsync(updateCommission);
+        (await commissionService.UpdateCommissionAsync(updateCommission)).ToObjectResult();
 
     [HttpDelete]
     public async Task<ActionResult> DeleteCommission([FromQuery] Guid id) =>
-        await commissionService.DeleteCommissionAsync(id);
+        (await commissionService.DeleteCommissionAsync(id)).ToObjectResult();
 
     private CommissionDto CommissionToCommissionDto(Commission commission) => new CommissionDto
     {

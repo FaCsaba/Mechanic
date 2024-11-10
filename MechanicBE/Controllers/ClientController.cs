@@ -1,7 +1,6 @@
 using MechanicBE.Errors;
-using MechanicBE.Models;
-using MechanicBE.Models.Dto;
-using MechanicBE.ResultType;
+using MechanicShared.Models;
+using MechanicShared.Models.Dto;
 using MechanicBE.Services;
 using Microsoft.AspNetCore.Mvc;
 
@@ -27,9 +26,10 @@ public class ClientController(IClientService clientService) : ControllerBase
 
     [HttpPut]
     public async Task<ActionResult?> UpdateClient([FromBody] UpdateClient updateClient) =>
-        await clientService.UpdateClientAsync(updateClient);
+        (await clientService.UpdateClientAsync(updateClient)).ToObjectResult();
 
     [HttpDelete]
     [Route("{id:guid}")]
-    public async Task<ActionResult?> DeleteClient([FromRoute] Guid id) => await clientService.DeleteClientAsync(id);
+    public async Task<ActionResult?> DeleteClient([FromRoute] Guid id) =>
+        (await clientService.DeleteClientAsync(id)).ToObjectResult();
 }

@@ -1,6 +1,6 @@
-using MechanicBE.Errors;
-using MechanicBE.Models;
-using MechanicBE.Models.Dto;
+using MechanicShared.Errors;
+using MechanicShared.Models;
+using MechanicShared.Models.Dto;
 using MechanicBE.ResultType;
 
 namespace MechanicBE.Services;

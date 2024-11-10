@@ -1,4 +1,4 @@
-using MechanicBE.Models;
+using MechanicShared.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace MechanicBE.Contexts;

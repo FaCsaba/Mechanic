@@ -1,5 +1,5 @@
 using FluentValidation;
-using MechanicBE.Models.Dto;
+using MechanicShared.Models.Dto;
 
 namespace MechanicBE.Validators;
 

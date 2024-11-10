@@ -1,5 +1,5 @@
 using System.Diagnostics;
-using MechanicBE.Models;
+using MechanicShared.Models;
 
 namespace MechanicBE.Services;
 

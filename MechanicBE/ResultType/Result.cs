@@ -1,10 +1,6 @@
-// using System.Diagnostics;
-// using FluentValidation.Results;
-//
-
 using System.Diagnostics;
-using FluentValidation;
 using MechanicBE.Errors;
+using MechanicShared.Errors;
 using Microsoft.AspNetCore.Mvc;
 
 namespace MechanicBE.ResultType;
@@ -55,7 +51,7 @@ public abstract record Result<TOk> : IResult
 
     public static implicit operator ActionResult<TOk>(Result<TOk> result) =>
         result.Match<ObjectResult>(x => new OkObjectResult(x),
-            err => err);
+            err => err.ToObjectResult());
 }
 
 public record OkResult<TOk>(TOk Value) : Result<TOk>
