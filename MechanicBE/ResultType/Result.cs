@@ -45,6 +45,7 @@ public abstract record Result<TOk> : IResult
         result switch
         {
             OkResult<Result<TOk>> innerResult => innerResult.Value,
+            ErrResult<Result<TOk>> err => err.Error,
             ErrResult<TOk> err => err,
             _ => throw new UnreachableException()
         };

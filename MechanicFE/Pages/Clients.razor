@@ -1,0 +1,155 @@
+@page "/clients"
+
+@inject HttpClient HttpClient
+
+<h3>Clients</h3>
+
+<QuickGrid Items="_clients">
+    <PropertyColumn Title="Name" Property="@(c => c.Name)" Sortable="true"/>
+    <PropertyColumn Title="Address" Property="@(c => c.Address)" Sortable="true"/>
+    <PropertyColumn Title="Email" Property="@(c => c.Email)" Sortable="true"/>
+    <TemplateColumn Title="Actions">
+        <button class="btn btn-primary" @onclick="@(() => OfferForUpdate(context))">Update</button>
+        <button class="btn btn-danger" @onclick="@(() => DeleteClient(context.Id))">Delete</button>
+    </TemplateColumn>
+</QuickGrid>
+<br/>
+<div class="container">
+    <EditForm Model="@_createClient" OnSubmit="@CreateClient">
+        <div class="form-group">
+            <label>Name</label>
+            <InputText class="form-control" @bind-Value="_createClient.Name"/>
+            @foreach (var error in _createClientValidationFailures.ExtractErrors("Name"))
+            {
+                <p class="text-danger">@error</p>
+            }
+        </div>
+        <div class="form-group">
+            <label>Email</label>
+            <InputText class="form-control" @bind-Value="_createClient.Email"/>
+            @foreach (var error in _createClientValidationFailures.ExtractErrors("Email"))
+            {
+                <p class="text-danger">@error</p>
+            }
+        </div>
+        <div class="form-group">
+            <label>Address</label>
+            <InputText class="form-control" @bind-Value="_createClient.Address"/>
+            @foreach (var error in _createClientValidationFailures.ExtractErrors("Address"))
+            {
+                <p class="text-danger">@error</p>
+            }
+        </div>
+        <div class="form-group">
+            <input type="submit" value="Create" class="btn btn-primary"/>
+        </div>
+    </EditForm>
+    <br/>
+
+    @if (_updateClient is not null)
+    {
+        <EditForm Model="@_updateClient" OnSubmit="@UpdateClient">
+            <div class="form-group">
+                <label>Name</label>
+                <InputText class="form-control" @bind-Value="_updateClient.Name"/>
+                @foreach (var error in _updateClientValidationFailures.ExtractErrors("Name"))
+                {
+                    <p class="text-danger">@error</p>
+                }
+            </div>
+            <div class="form-group">
+                <label>Email</label>
+                <InputText class="form-control" @bind-Value="_updateClient.Email"/>
+                @foreach (var error in _updateClientValidationFailures.ExtractErrors("Email"))
+                {
+                    <p class="text-danger">@error</p>
+                }
+            </div>
+            <div class="form-group">
+                <label>Address</label>
+                <InputText class="form-control" @bind-Value="_updateClient.Address"/>
+                @foreach (var error in _updateClientValidationFailures.ExtractErrors("Address"))
+                {
+                    <p class="text-danger">@error</p>
+                }
+            </div>
+            <div class="form-group">
+                <input type="submit" value="Update" class="btn btn-primary"/>
+            </div>
+        </EditForm>
+    }
+</div>
+
+@code {
+    IQueryable<Client> _clients = new List<Client>().AsQueryable();
+    CreateClient _createClient = new();
+    UpdateClient? _updateClient;
+    List<ValidationFailure> _createClientValidationFailures = [];
+    List<ValidationFailure> _updateClientValidationFailures = [];
+
+    private async Task GetClients()
+    {
+        var clients = await HttpClient.GetFromJsonAsync<List<Client>>("client")
+                      ?? throw new Exception("Failed to get clients");
+        _clients = clients.AsQueryable();
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        await GetClients();
+    }
+
+    private async Task DeleteClient(Guid id)
+    {
+        await HttpClient.DeleteAsync($"client/{id}");
+        await GetClients();
+        if (_updateClient?.Id == id) _updateClient = null;
+    }
+
+    private async Task CreateClient()
+    {
+        var res = await HttpClient.PostAsJsonAsync("client", _createClient);
+        if (res.IsSuccessStatusCode)
+        {
+            await GetClients();
+            _createClient = new CreateClient();
+            _createClientValidationFailures = [];
+        }
+        else
+        {
+            var validationError = await res.Content.ReadFromJsonAsync<ValidationError>()
+                                  ?? throw new Exception("Failed to read error message");
+
+            _createClientValidationFailures = validationError.ValidationFailures;
+        }
+    }
+
+    private void OfferForUpdate(Client client)
+    {
+        _updateClient = new UpdateClient
+        {
+            Id = client.Id,
+            Name = client.Name,
+            Email = client.Email,
+            Address = client.Address
+        };
+    }
+
+    private async Task UpdateClient()
+    {
+        var res = await HttpClient.PutAsJsonAsync("client", _updateClient);
+        if (res.IsSuccessStatusCode)
+        {
+            await GetClients();
+            _updateClient = null;
+            _updateClientValidationFailures = [];
+        }
+        else
+        {
+            var validationError = await res.Content.ReadFromJsonAsync<ValidationError>()
+                                  ?? throw new Exception("Failed to read error message");
+
+            _updateClientValidationFailures = validationError.ValidationFailures;
+        }
+    }
+}

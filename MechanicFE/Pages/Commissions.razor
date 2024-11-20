@@ -1,7 +1,7 @@
 @page "/commissions"
-@using MechanicShared.Models
-@using MechanicShared.Models.Dto
-@inject HttpClient httpClient
+
+@inject HttpClient HttpClient
+
 <h3>Commissions</h3>
 
 <QuickGrid Items="@_commissions">
@@ -15,66 +15,179 @@
     <PropertyColumn Title="Description" Property="@(c => c.Description)" Sortable="true"/>
 
     <TemplateColumn Title="Actions">
-
-        <button @onclick="@(() => DeleteCommission(context.Id))">Delete</button>
-        @* <button @onclick="@(() => Fire(context))">Fire</button> *@
+        <button class="btn btn-primary" @onclick="@(() => OfferForUpdate(context))">Update</button>
+        <button class="btn btn-danger" @onclick="@(() => DeleteCommission(context.Id))">Delete</button>
     </TemplateColumn>
 </QuickGrid>
-
-<EditForm Model=@_createCommission OnSubmit="@CreateCommission">
-    <div class="form-group">
-        <label>Client</label>
-        <InputSelect @bind-Value="_createCommission.ClientId">
-            <option></option>
-            @foreach (var client in _clients)
+<br/>
+<div class="container">
+    <h4>Create Commission</h4>
+    <EditForm Model=@_createCommission OnSubmit="@CreateCommission">
+        <div class="form-group">
+            <label>Client</label>
+            <InputSelect class="form-control" @bind-Value="_createCommission.ClientId">
+                <option></option>
+                @foreach (var client in _clients)
+                {
+                    <option value="@client.Id">@client.Name</option>
+                }
+            </InputSelect>
+            @foreach (var error in _createCommissionValidationFailures.ExtractErrors("ClientId"))
             {
-                <option value="@client.Id">@client.Name</option>
+                <p class="text-danger">@error</p>
             }
-        </InputSelect>
-    </div>
-    <div class="form-group">
-        <label>License Plate Number</label>
-        <InputText @bind-Value="_createCommission.LicensePlateNumber"/>
-    </div>
-    <div class="form-group">
-        <label>Manufacturing at</label>
-        <InputDate @bind-Value="_createCommission.VehicleManufacturingDate" />
-    </div>
-    <div class="form-group">
-        <label>Fault</label>
-        <InputSelect @bind-Value="_createCommission.FaultCategory">
-            <option value="@FaultCategory.Bodywork">BodyWork</option>
-            <option value="@FaultCategory.Motor">Motor</option>
-            <option value="@FaultCategory.RunningGear">RunningGear</option>
-            <option value="@FaultCategory.Brake">Brake</option>
-        </InputSelect>
-    </div>
-    <div class="form-group">
-        <label>Severity</label>
-        <InputNumber @bind-Value="_createCommission.Severity" min="0" max="10" />
-    </div>
-    <div class="form-group">
-        <label>Description</label>
-        <InputText @bind-Value="_createCommission.Description" />
-    </div>
-    <input type="submit" value="Submit" class="btn btn-primary"/>
-</EditForm>
+        </div>
+        <div class="form-group">
+            <label>License Plate Number</label>
+            <InputText class="form-control" @bind-Value="_createCommission.LicensePlateNumber"/>
+            @foreach (var error in _createCommissionValidationFailures.ExtractErrors("LicensePlateNumber"))
+            {
+                <p class="text-danger">@error</p>
+            }
+        </div>
+        <div class="form-group">
+            <label>Manufacturing at</label>
+            <InputDate class="form-control" @bind-Value="_createCommission.VehicleManufacturingDate"/>
+            @foreach (var error in _createCommissionValidationFailures.ExtractErrors("VehicleManufacturingDate"))
+            {
+                <p class="text-danger">@error</p>
+            }
+        </div>
+        <div class="form-group">
+            <label>Fault</label>
+            <InputSelect class="form-control" @bind-Value="_createCommission.FaultCategory">
+                <option value="@FaultCategory.Bodywork">BodyWork</option>
+                <option value="@FaultCategory.Motor">Motor</option>
+                <option value="@FaultCategory.RunningGear">RunningGear</option>
+                <option value="@FaultCategory.Brake">Brake</option>
+            </InputSelect>
+            @foreach (var error in _createCommissionValidationFailures.ExtractErrors("FaultCategory"))
+            {
+                <p class="text-danger">@error</p>
+            }
+        </div>
+        <div class="form-group">
+            <label>Severity</label>
+            <InputNumber class="form-control" @bind-Value="_createCommission.Severity" min="0" max="10"/>
+            @foreach (var error in _createCommissionValidationFailures.ExtractErrors("Severity"))
+            {
+                <p class="text-danger">@error</p>
+            }
+        </div>
+        <div class="form-group">
+            <label>Description</label>
+            <InputText class="form-control" @bind-Value="_createCommission.Description"/>
+            @foreach (var error in _createCommissionValidationFailures.ExtractErrors("Description"))
+            {
+                <p class="text-danger">@error</p>
+            }
+        </div>
+        <div class="form-group">
+            <input type="submit" value="Create" class="btn btn-primary"/>
+        </div>
+    </EditForm>
+    <br/>
+
+    @if (_updateCommission is not null)
+    {
+        <h4>Update Commission</h4>
+        <EditForm Model="@_updateCommission" OnSubmit="@UpdateCommission">
+            <div class="form-group">
+                <label>Client</label>
+                <InputSelect class="form-control" @bind-Value="_updateCommission.ClientId">
+                    <option></option>
+                    @foreach (var client in _clients)
+                    {
+                        <option value="@client.Id">@client.Name</option>
+                    }
+                </InputSelect>
+                @foreach (var error in _updateCommissionValidationFailures.ExtractErrors("ClientId"))
+                {
+                    <p class="text-danger">@error</p>
+                }
+            </div>
+            <div class="form-group">
+                <label>License Plate Number</label>
+                <InputText class="form-control" @bind-Value="_updateCommission.LicensePlateNumber"/>
+                @foreach (var error in _updateCommissionValidationFailures.ExtractErrors("LicensePlateNumber"))
+                {
+                    <p class="text-danger">@error</p>
+                }
+            </div>
+            <div class="form-group">
+                <label>Manufacturing at</label>
+                <InputDate class="form-control" @bind-Value="_updateCommission.VehicleManufacturingDate"/>
+                @foreach (var error in _updateCommissionValidationFailures.ExtractErrors("VehicleManufacturingDate"))
+                {
+                    <p class="text-danger">@error</p>
+                }
+            </div>
+            <div class="form-group">
+                <label>Fault</label>
+                <InputSelect class="form-control" @bind-Value="_updateCommission.FaultCategory">
+                    <option value="@FaultCategory.Bodywork">BodyWork</option>
+                    <option value="@FaultCategory.Motor">Motor</option>
+                    <option value="@FaultCategory.RunningGear">RunningGear</option>
+                    <option value="@FaultCategory.Brake">Brake</option>
+                </InputSelect>
+                @foreach (var error in _updateCommissionValidationFailures.ExtractErrors("FaultCategory"))
+                {
+                    <p class="text-danger">@error</p>
+                }
+            </div>
+            <div class="form-group">
+                <label>Severity</label>
+                <InputNumber class="form-control" @bind-Value="_updateCommission.Severity" min="0" max="10"/>
+                @foreach (var error in _updateCommissionValidationFailures.ExtractErrors("Severity"))
+                {
+                    <p class="text-danger">@error</p>
+                }
+            </div>
+            <div class="form-group">
+                <label>Status</label>
+                <InputSelect class="form-control" @bind-Value="_updateCommission.Status">
+                    <option value="@CommissionStatus.Todo">Todo</option>
+                    <option value="@CommissionStatus.Doing">Doing</option>
+                    <option value="@CommissionStatus.Done">Done</option>
+                </InputSelect>
+                @foreach (var error in _updateCommissionValidationFailures.ExtractErrors("Status"))
+                {
+                    <p class="text-danger">@error</p>
+                }
+            </div>
+            <div class="form-group">
+                <label>Description</label>
+                <InputText class="form-control" @bind-Value="_updateCommission.Description"/>
+                @foreach (var error in _updateCommissionValidationFailures.ExtractErrors("Description"))
+                {
+                    <p class="text-danger">@error</p>
+                }
+            </div>
+            <div class="form-group">
+                <input type="submit" value="Update" class="btn btn-primary"/>
+            </div>
+        </EditForm>
+    }
+</div>
 
 @code {
     IQueryable<CommissionDto> _commissions = new List<CommissionDto>().AsQueryable();
     IQueryable<Client> _clients = new List<Client>().AsQueryable();
     CreateCommission _createCommission = new();
+    UpdateCommission? _updateCommission;
+    List<ValidationFailure> _createCommissionValidationFailures = [];
+    List<ValidationFailure> _updateCommissionValidationFailures = [];
 
     private async Task GetCommissions()
     {
-        var commissionDtos = await httpClient.GetFromJsonAsync<List<CommissionDto>>("commission")
+        var commissionDtos = await HttpClient.GetFromJsonAsync<List<CommissionDto>>("commission")
                              ?? throw new Exception("Failed to get commissions");
         _commissions = commissionDtos.AsQueryable();
     }
 
     private async Task GetClients()
     {
-        var clients = await httpClient.GetFromJsonAsync<List<Client>>("client") ?? throw new Exception("Failed to get clients");
+        var clients = await HttpClient.GetFromJsonAsync<List<Client>>("client") ?? throw new Exception("Failed to get clients");
         _clients = clients.AsQueryable();
     }
 
@@ -85,14 +198,57 @@
 
     private async Task DeleteCommission(Guid id)
     {
-        await httpClient.DeleteAsync($"commission?id={id}");
+        await HttpClient.DeleteAsync($"commission?id={id}");
         await GetCommissions();
     }
 
     private async Task CreateCommission()
     {
-        await httpClient.PostAsJsonAsync("commission", _createCommission);
-        await GetCommissions();
+        var res = await HttpClient.PostAsJsonAsync("commission", _createCommission);
+        if (res.IsSuccessStatusCode)
+        {
+            await GetCommissions();
+            _createCommission = new CreateCommission();
+            _createCommissionValidationFailures = [];
+        }
+        else
+        {
+            var validationError = await res.Content.ReadFromJsonAsync<ValidationError>()
+                                  ?? throw new Exception("Failed to read error message");
+            ;
+            _createCommissionValidationFailures = validationError.ValidationFailures;
+        }
     }
 
+    private void OfferForUpdate(CommissionDto commissionDto)
+    {
+        _updateCommission = new UpdateCommission
+        {
+            Id = commissionDto.Id,
+            ClientId = commissionDto.Client.Id,
+            Description = commissionDto.Description ?? "",
+            FaultCategory = commissionDto.FaultCategory,
+            Severity = commissionDto.Severity,
+            Status = commissionDto.Status,
+            LicensePlateNumber = commissionDto.LicensePlateNumber,
+            VehicleManufacturingDate = commissionDto.VehicleManufacturingDate
+        };
+    }
+
+    private async Task UpdateCommission()
+    {
+        var res = await HttpClient.PutAsJsonAsync("commission", _updateCommission);
+        if (res.IsSuccessStatusCode)
+        {
+            await GetCommissions();
+            _updateCommission = null;
+        }
+        else
+        {
+            var validationError = await res.Content.ReadFromJsonAsync<ValidationError>()
+                                  ?? throw new Exception("Failed to read error message");
+            ;
+            _updateCommissionValidationFailures = validationError.ValidationFailures;
+        }
+    }
 }

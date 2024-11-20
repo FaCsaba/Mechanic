@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using FluentValidation;
 using MechanicBE.Contexts;
 using MechanicBE.Errors;
@@ -31,7 +32,8 @@ public class CommissionService(
                 Severity = commissionDto.Severity,
                 VehicleManufacturingDate = commissionDto.VehicleManufacturingDate,
                 Status = CommissionStatus.Todo,
-                LicensePlateNumber = commissionDto.LicensePlateNumber,
+                LicensePlateNumber = commissionDto.LicensePlateNumber ??
+                                     throw new UnreachableException("License plate must be valid by this point."),
                 Description = commissionDto.Description
             };
             await db.Commissions.AddAsync(commission);

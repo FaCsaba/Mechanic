@@ -35,7 +35,7 @@ public class WorkHourEstimationService(TimeProvider timeProvider) : IWorkHourEst
     private static double WorkHourWeightFromSeverity(int severity) => severity switch
     {
         1 or 2 => 0.2,
-        2 or 4 => 0.4,
+        3 or 4 => 0.4,
         >= 5 and <= 7 => 0.6,
         8 or 9 => 0.8,
         10 => 1,
