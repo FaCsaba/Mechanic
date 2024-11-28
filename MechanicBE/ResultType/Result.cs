@@ -21,6 +21,16 @@ public abstract record Result<TOk> : IResult
 
     public abstract TResult Match<TResult>(Func<TOk, TResult> okFn, Func<Error, TResult> errFn);
 
+    public TOk Unwrap()
+    {
+        return Match(ok => ok, err => throw new Exception(err.Message));
+    }
+
+    public Error UnwrapErr()
+    {
+        return Match(ok => throw new Exception("UnwrapErr on an ok value"), err => err);
+    }
+    
     public Error? Use(Consumer<TOk> fn) => Match<Error?>(value =>
     {
         fn.Invoke(value);
