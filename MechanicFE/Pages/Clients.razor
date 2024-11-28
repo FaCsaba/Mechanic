@@ -1,6 +1,7 @@
 @page "/clients"
 
 @inject HttpClient HttpClient
+@inject IClientService ClientService
 
 <h3>Clients</h3>
 
@@ -89,9 +90,7 @@
 
     private async Task GetClients()
     {
-        var clients = await HttpClient.GetFromJsonAsync<List<Client>>("client")
-                      ?? throw new Exception("Failed to get clients");
-        _clients = clients.AsQueryable();
+        _clients = await ClientService.GetClients();
     }
 
     protected override async Task OnInitializedAsync()
@@ -101,26 +100,23 @@
 
     private async Task DeleteClient(Guid id)
     {
-        await HttpClient.DeleteAsync($"client/{id}");
+        await ClientService.DeleteClient(id);
         await GetClients();
         if (_updateClient?.Id == id) _updateClient = null;
     }
 
     private async Task CreateClient()
     {
-        var res = await HttpClient.PostAsJsonAsync("client", _createClient);
-        if (res.IsSuccessStatusCode)
+        try
         {
+            await ClientService.CreateClient(_createClient);
             await GetClients();
             _createClient = new CreateClient();
             _createClientValidationFailures = [];
         }
-        else
+        catch (ValidationErrorException e)
         {
-            var validationError = await res.Content.ReadFromJsonAsync<ValidationError>()
-                                  ?? throw new Exception("Failed to read error message");
-
-            _createClientValidationFailures = validationError.ValidationFailures;
+            _createClientValidationFailures = e.ValidationFailures;
         }
     }
 
@@ -137,19 +133,17 @@
 
     private async Task UpdateClient()
     {
-        var res = await HttpClient.PutAsJsonAsync("client", _updateClient);
-        if (res.IsSuccessStatusCode)
+        try
         {
+            if (_updateClient is null) return;
+            await ClientService.UpdateClient(_updateClient);
             await GetClients();
             _updateClient = null;
             _updateClientValidationFailures = [];
         }
-        else
+        catch (ValidationErrorException e)
         {
-            var validationError = await res.Content.ReadFromJsonAsync<ValidationError>()
-                                  ?? throw new Exception("Failed to read error message");
-
-            _updateClientValidationFailures = validationError.ValidationFailures;
+            _updateClientValidationFailures = e.ValidationFailures;
         }
     }
 }

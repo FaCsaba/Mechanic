@@ -1,6 +1,10 @@
 @page "/commissions"
+@using MechanicFE.Exceptions
+@using MechanicFE.Services
 
 @inject HttpClient HttpClient
+@inject ICommissionService CommissionService 
+@inject IClientService ClientService
 
 <h3>Commissions</h3>
 
@@ -180,15 +184,12 @@
 
     private async Task GetCommissions()
     {
-        var commissionDtos = await HttpClient.GetFromJsonAsync<List<CommissionDto>>("commission")
-                             ?? throw new Exception("Failed to get commissions");
-        _commissions = commissionDtos.AsQueryable();
+        _commissions = await CommissionService.GetCommissions();
     }
 
     private async Task GetClients()
     {
-        var clients = await HttpClient.GetFromJsonAsync<List<Client>>("client") ?? throw new Exception("Failed to get clients");
-        _clients = clients.AsQueryable();
+        _clients = await ClientService.GetClients();
     }
 
     protected override async Task OnInitializedAsync()
@@ -198,25 +199,22 @@
 
     private async Task DeleteCommission(Guid id)
     {
-        await HttpClient.DeleteAsync($"commission?id={id}");
+        await CommissionService.DeleteCommission(id);
         await GetCommissions();
     }
 
     private async Task CreateCommission()
     {
-        var res = await HttpClient.PostAsJsonAsync("commission", _createCommission);
-        if (res.IsSuccessStatusCode)
+        try
         {
+            await CommissionService.CreateCommission(_createCommission);
             await GetCommissions();
             _createCommission = new CreateCommission();
             _createCommissionValidationFailures = [];
         }
-        else
+        catch (ValidationErrorException e)
         {
-            var validationError = await res.Content.ReadFromJsonAsync<ValidationError>()
-                                  ?? throw new Exception("Failed to read error message");
-            ;
-            _createCommissionValidationFailures = validationError.ValidationFailures;
+            _createCommissionValidationFailures = e.ValidationFailures;
         }
     }
 
@@ -237,18 +235,16 @@
 
     private async Task UpdateCommission()
     {
-        var res = await HttpClient.PutAsJsonAsync("commission", _updateCommission);
-        if (res.IsSuccessStatusCode)
+        try
         {
+            if (_updateCommission is null) return;
+            await CommissionService.UpdateCommission(_updateCommission);
             await GetCommissions();
             _updateCommission = null;
         }
-        else
+        catch (ValidationErrorException e)
         {
-            var validationError = await res.Content.ReadFromJsonAsync<ValidationError>()
-                                  ?? throw new Exception("Failed to read error message");
-            ;
-            _updateCommissionValidationFailures = validationError.ValidationFailures;
+            _updateCommissionValidationFailures = e.ValidationFailures;
         }
     }
 }
